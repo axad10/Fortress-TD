@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORTRESS — Tower Defense</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<!-- MAIN MENU -->
+<div id="menu-screen" class="screen active">
+  <div class="menu-bg"></div>
+  <div class="menu-content">
+    <div class="game-logo">
+      <div class="logo-top">FORTRESS</div>
+      <div class="logo-sub">TOWER DEFENSE</div>
+    </div>
+    <div class="menu-buttons">
+      <button class="btn-main" onclick="startGame()">NEW GAME</button>
+      <button class="btn-secondary" onclick="showLeaderboard()">LEADERBOARD</button>
+      <button class="btn-secondary" onclick="showHelp()">HOW TO PLAY</button>
+    </div>
+    <div class="menu-deco">
+      <div class="deco-line"></div>
+      <span>DEFEND YOUR BASE</span>
+      <div class="deco-line"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HELP SCREEN -->
+<div id="help-screen" class="screen">
+  <div class="panel-box">
+    <h2>HOW TO PLAY</h2>
+    <div class="help-grid">
+      <div class="help-item">
+        <div class="help-icon cannon-icon"></div>
+        <div><strong>Cannon Tower</strong><br>Cost: 50 gold<br>Fast fire, medium damage</div>
+      </div>
+      <div class="help-item">
+        <div class="help-icon sniper-icon"></div>
+        <div><strong>Sniper Tower</strong><br>Cost: 100 gold<br>Long range, high damage</div>
+      </div>
+      <div class="help-item">
+        <div class="help-icon splash-icon"></div>
+        <div><strong>Splash Tower</strong><br>Cost: 150 gold<br>Area damage, slows enemies</div>
+      </div>
+      <div class="help-item">
+        <div class="help-icon upgrade-icon"></div>
+        <div><strong>Upgrades</strong><br>Click a tower<br>Upgrade up to level 3</div>
+      </div>
+    </div>
+    <div class="help-tips">
+      <p>— Enemies follow the red path. Block it with towers.</p>
+      <p>— You lose 1 life per enemy that reaches the base.</p>
+      <p>— Killing enemies earns gold. Spend it wisely.</p>
+      <p>— Click towers to upgrade or sell them.</p>
+    </div>
+    <button class="btn-main" onclick="showMenu()">BACK</button>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="leaderboard-screen" class="screen">
+  <div class="panel-box">
+    <h2>LEADERBOARD</h2>
+    <div id="lb-list" class="lb-list">
+      <div class="lb-loading">Loading scores...</div>
+    </div>
+    <button class="btn-main" onclick="showMenu()">BACK</button>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="game-screen" class="screen">
+  <div class="game-layout">
+    <!-- TOP HUD -->
+    <div class="hud-top">
+      <div class="hud-item">
+        <span class="hud-label">WAVE</span>
+        <span class="hud-val" id="hud-wave">1</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">LIVES</span>
+        <span class="hud-val lives-val" id="hud-lives">20</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">GOLD</span>
+        <span class="hud-val gold-val" id="hud-gold">150</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">SCORE</span>
+        <span class="hud-val" id="hud-score">0</span>
+      </div>
+      <button class="btn-wave" id="btn-wave" onclick="startWave()">START WAVE</button>
+    </div>
+
+    <!-- CANVAS -->
+    <div class="canvas-wrap">
+      <canvas id="gameCanvas" width="700" height="500"></canvas>
+      <!-- TOWER PANEL (click info) -->
+      <div id="tower-panel" class="tower-panel hidden">
+        <div class="tp-title" id="tp-name">Cannon Tower</div>
+        <div class="tp-level" id="tp-level">Level 1</div>
+        <div class="tp-stats" id="tp-stats"></div>
+        <button class="btn-upgrade" id="btn-upgrade" onclick="upgradeTower()">UPGRADE</button>
+        <button class="btn-sell" id="btn-sell" onclick="sellTower()">SELL</button>
+        <button class="btn-close" onclick="closeTowerPanel()">✕</button>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-title">TOWERS</div>
+      <div class="tower-cards">
+        <div class="tower-card" id="card-cannon" onclick="selectTower('cannon')">
+          <div class="tc-icon cannon-icon"></div>
+          <div class="tc-info">
+            <div class="tc-name">Cannon</div>
+            <div class="tc-cost">50 gold</div>
+          </div>
+          <div class="tc-stats">DMG 20 | RNG 90</div>
+        </div>
+        <div class="tower-card" id="card-sniper" onclick="selectTower('sniper')">
+          <div class="tc-icon sniper-icon"></div>
+          <div class="tc-info">
+            <div class="tc-name">Sniper</div>
+            <div class="tc-cost">100 gold</div>
+          </div>
+          <div class="tc-stats">DMG 60 | RNG 160</div>
+        </div>
+        <div class="tower-card" id="card-splash" onclick="selectTower('splash')">
+          <div class="tc-icon splash-icon"></div>
+          <div class="tc-info">
+            <div class="tc-name">Splash</div>
+            <div class="tc-cost">150 gold</div>
+          </div>
+          <div class="tc-stats">DMG 35 | AoE</div>
+        </div>
+      </div>
+      <div class="sidebar-title" style="margin-top:16px">SELECTED</div>
+      <div id="selected-info" class="selected-info">Click a tower type above, then click on the map to place it.</div>
+      <button class="btn-cancel hidden" id="btn-cancel" onclick="cancelSelect()">CANCEL</button>
+
+      <div class="sidebar-title" style="margin-top:16px">WAVE INFO</div>
+      <div id="wave-info" class="wave-info">Press START WAVE to begin.</div>
+    </div>
+  </div>
+</div>
+
+<!-- GAME OVER -->
+<div id="gameover-screen" class="screen">
+  <div class="panel-box gameover-box">
+    <div class="go-title">GAME OVER</div>
+    <div class="go-wave">Survived <span id="go-wave">0</span> Waves</div>
+    <div class="go-score">Score: <span id="go-score">0</span></div>
+    <div class="go-form">
+      <input type="text" id="go-name" placeholder="Enter your name" maxlength="12" class="name-input">
+      <button class="btn-main" onclick="submitScore()">SAVE SCORE</button>
+    </div>
+    <button class="btn-secondary" onclick="startGame()">PLAY AGAIN</button>
+    <button class="btn-secondary" onclick="showMenu()">MAIN MENU</button>
+  </div>
+</div>
+
+<!-- WAVE CLEARED -->
+<div id="wave-clear" class="wave-clear hidden">
+  <div class="wc-text">WAVE CLEARED!</div>
+  <div class="wc-bonus" id="wc-bonus">+100 bonus gold</div>
+</div>
+
+<script src="/static/js/game.js"></script>
+</body>
+</html>
